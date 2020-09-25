@@ -1,0 +1,15 @@
+{
+    "project": "reactjsapp",
+    "proxyStrategy": "inner",
+    "repos": [
+        {
+          "framework": "reactjs",
+          "name": "react-proj",
+          "repository": "https://github.com/gvo-gonzalez/react-project.git",
+          "into": "$HOME/app/react-proj",
+          "domains": "react-proj.test",
+          "hostname": "docker-local",
+          "plugins": []
+        }
+    ]
+}

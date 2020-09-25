@@ -1,0 +1,19 @@
+{
+    "project": "laravelapp",
+    "proxyStrategy": "inner",
+    "repos": [
+        {
+          "framework": "laravel|7.0",
+          "name": "single-proj",
+          "repository": "https://github.com/gvo-gonzalez/laravel-simpleblog.git",
+          "into": "$HOME/app/single-proj",
+          "domains": "single-proj.test",
+          "hostname": "docker-local",
+          "plugins": ["laravel"]
+        }
+    ],
+    "dbs": [
+        "redis",
+        "mysql"
+    ]
+}

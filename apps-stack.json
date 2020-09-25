@@ -1,0 +1,29 @@
+{
+  "project": "singlesrv",
+  "proxyStrategy": "inner",
+  "repos": [
+      {
+        "framework": "laravel|7.0",
+        "name": "single-proj",
+        "repository": "https://github.com/gvo-gonzalez/laravel-simpleblog.git",
+        "into": "$HOME/app/single-proj",
+        "domains": "single-proj.test",
+        "hostname": "docker-local",
+        "plugins": ["laravel"]
+      },
+      {
+        "framework": "reactjs",
+        "name": "react-proj",
+        "repository": "https://github.com/gvo-gonzalez/react-project.git",
+        "into": "$HOME/app/react-proj",
+        "domains": "react-proj.test",
+        "hostname": "docker-local",
+        "plugins": []
+      }
+  ],
+  "dbs": [
+      "redis",
+      "mongo",
+      "mysql"
+  ]
+}

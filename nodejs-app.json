@@ -1,0 +1,19 @@
+{
+    "project": "nodejsapp",
+    "proxyStrategy": "inner",
+    "repos": [
+        {
+          "framework": "nodejs",
+          "name": "nodejs-app",
+          "repository": "https://github.com/gvo-gonzalez/docker-nodejs.git",
+          "into": "$HOME/app/nodejs-app",
+          "domains": "nodejs-app.test",
+          "hostname": "docker-local",
+          "plugins": []
+        }
+    ],
+    "dbs": [
+        "redis",
+        "mongo"
+    ]
+}
