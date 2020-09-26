@@ -1,5 +1,5 @@
 # pull official base image
-FROM node:14.1-alpine as builder
+FROM node:14.2.0 as builder
 
 # set working directory
 WORKDIR /app
@@ -9,13 +9,7 @@ ENV PATH /app/node_modules/.bin:$PATH
 
 # install app dependencies
 COPY package*.json ./
-#COPY package-lock.json ./
-# Fix error core-js@<3 is no longer maintained: npm install -g npm
-RUN npm install -g npm
-RUN npm install --silent
-#RUN npm install react-scripts@3.4.1 -g --silent
-RUN npm audit fix
-
+RUN npm install
 # add app
 COPY . ./
 #EXPOSE 3000
@@ -27,5 +21,5 @@ FROM nginx:1.16.0-alpine
 COPY --from=builder /app/build /usr/share/nginx/html
 RUN rm /etc/nginx/conf.d/default.conf
 COPY nginx/react-nginx.conf /etc/nginx/conf.d
-EXPOSE 80
+EXPOSE 3080
 CMD ["nginx", "-g", "daemon off;"]

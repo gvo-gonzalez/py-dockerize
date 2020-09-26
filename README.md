@@ -20,6 +20,9 @@ Backend DB's supported:
 - mysql
 - mongo
 
+QUEUES Services supported:
+- rabbitmq (you can access to the dashboard by typing 127.0.0.1:15672 in your browser)
+
 Writen in python it requires:
 
 . docker

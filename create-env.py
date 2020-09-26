@@ -28,12 +28,23 @@ DB_PORTS = {
     "mongo": "27017",
     "mysql": "3306"
 }
+
 DB_DATA_PATH = {
     "mysql": "/var/lib/mysql",
     "redis": "/data",
     "mongo": "/data/db"
 }
+
+QUEUE_PORTS = {
+    "rabbitmq": "15672"
+}
+
+QUEUE_DATA_PATH = {
+    "rabbitmq": "/var/lib/rabbitmq"
+}
+
 DB_VOLUME = "~/.dockerize/data/{}"
+QUEUE_VOLUME = "~/.dockerize/data/{}"
 
 def printMessage(msg):
     msgLen = len(msg) + 10
@@ -81,12 +92,12 @@ def parseConfigJson( config_file ):
     repos = data['repos'] if "repos" in data else []
     dbs = data['dbs'] if "dbs" in data else []
     custom = data['custom'] if "custom" in data else []
-
+    queues = data['queues'] if "queues" in data else []
     if "proxyStrategy" in data:
         proxyStrategy = data['proxyStrategy']
 
     print ("DONE!\n\n")
-    return data['project'], repos, dbs, custom
+    return data['project'], repos, dbs, custom, queues
 
 
 def json2yaml(json, level=0):
@@ -504,6 +515,38 @@ def writeDBCompose(project, dbs):
     
     print("DONE!\n\n")
 
+def writeQueuesCompose(project, queues):
+    printMessage('Writing dbs into docker-compose.yml')
+    if len(queues):
+        try:
+            for queue in queues:
+                volume = QUEUE_VOLUME.format(queue)
+                dataToWrite = {
+                    queue: {
+                        "build": "./" + queue + "/",
+                        "image": "harbur/rabbitmq-cluster" if queue == "rabbitmq" else "",
+                        "networks": {
+                            project: {
+                                "aliases": [
+                                    queue + ".qsrv"
+                                ]
+                            }
+                        },
+                        "volumes": [
+                            VOLUME_STR.format(volume, QUEUE_DATA_PATH[queue])
+                        ],
+                        "ports": [
+                            "0.0.0.0:" + QUEUE_PORTS[queue] + ":" + QUEUE_PORTS[queue]
+                        ]
+                    }
+                }
+                with open(COMPOSE_YML, 'a') as file:
+                    file.write( os.linesep + json2yaml(dataToWrite, 1) )
+        except Exception as e:
+            print("Write dbs into docker-compose.yml Error:", e)
+            sys.exit(1)
+    
+    print("DONE!\n\n")
 
 def writeCustoms(project, custom):
     printMessage('Writing custom into docker-compose.yml')
@@ -525,7 +568,7 @@ def startContainers(project):
 
 if __name__ == "__main__":
     # Get Configuration items from json details file
-    project, appslist, dbsbackend, custom = parseConfigJson( sys.argv[1] )
+    project, appslist, dbsbackend, custom, queues = parseConfigJson( sys.argv[1] )
     
     # Start writing our docker-compose.yml file
     dockerComposeFileInit()
@@ -539,22 +582,25 @@ if __name__ == "__main__":
         
         # Write application details into docker-compose.yml file
         writeAppDetailsIntoComposeFile(project, app)
-        
+    # Remove older configurations for nginx into conf.d directory        
     cleanOldNginxConfs()
-
+    # Creates  new vhost configuration files to access your micreservices trough any web browser
     createNginxConfs()
-
+    # Append nginx to docker-compose.yml file
     writeNginxCompose(project)
-
+    # Append databases for your project to docker-compose.yml file
     writeDBCompose(project, dbsbackend)
-
+    # Append your queue server required for your project to docker-compose.yml file
+    writeQueuesCompose(project, queues)
+    # If you have included some custom image it's append to docker-compose.yml file
     writeCustoms(project, custom)
-
+    # Append network configuration for our stack
     writeNetworkCompose(project)
-
+    # Creates Aliases for your projects in /etc/hosts file so you can browser your services 
+    # with locals dns 
     writeEtcHosts(project)
-
+    # Finally it creates your defined stack
     startContainers(project)
-
+    # Apply some post configuration if required
     for app in appslist:
         processPlugins(project, app)
